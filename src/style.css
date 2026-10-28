@@ -1485,6 +1485,7 @@ html[data-theme='light'] .experience.section-pad {
 }
 .experience-title-word { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; padding-bottom: .08em; margin-bottom: -.08em; }
 .experience-title-char { display: inline-block; transform-origin: 50% 100%; }
+.scroll-title-char { display: inline-block; transform-origin: 50% 100%; backface-visibility: hidden; }
 html[data-theme='light'] .experience .section-heading h2 { color: #f6f1e5; }
 .experience .section-heading h2 em,
 html[data-theme='light'] .experience .section-heading h2 em { color: inherit; font: inherit; font-style: normal; }
@@ -1611,10 +1612,21 @@ html[data-theme='light'] .project-card .project-links a { color: currentColor; f
 .project-card:hover::after { transform: rotate(45deg); }
 @media (max-width: 900px) {
   .project-card,
-  html[data-theme='light'] .project-card { min-height: 500px; grid-template-columns: minmax(0, 1.1fr) minmax(180px, .85fr); }
-  .project-art { min-height: 300px; }
+  html[data-theme='light'] .project-card {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    gap: 0;
+    padding: clamp(22px, 4vw, 34px) clamp(20px, 4vw, 30px) 64px;
+  }
+  .project-meta { grid-column: 1; grid-row: 1; }
+  .project-art { grid-column: 1; grid-row: 2; min-width: 0; min-height: 0; height: clamp(230px, 44vw, 340px); margin-top: 22px; }
+  .project-details { grid-column: 1; grid-row: 3; min-width: 0; padding: 24px 0 12px; }
+  .project-details > div { min-width: 0; }
   .project-details h3,
-  html[data-theme='light'] .project-details h3 { font-size: clamp(34px, 5vw, 48px); }
+  html[data-theme='light'] .project-details h3 { max-width: 100%; font-size: clamp(34px, 7vw, 52px); overflow-wrap: anywhere; }
+  .project-bottom { grid-column: 1; grid-row: 4; padding-top: 14px; }
+  .project-card::after { right: 24px; bottom: 25px; }
 }
 @media (max-width: 620px) {
   .project-grid { grid-template-columns: minmax(0, 1fr); }
@@ -1761,8 +1773,9 @@ html[data-theme='light'] .site-footer .back-top { color: #66556d; }
 
 /* Final footer typography and contrast pass for the monochrome direction. */
 .contact-type-content { display: inline-block; }
-.contact-type-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .58em 0; margin-block: -.58em; }
+.contact-type-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .58em .1em; margin: -.58em -.1em; perspective: 500px; }
 .contact-type-word { display: inline-block; }
+.contact-type-char { display: inline-block; transform-origin: 50% 85%; backface-visibility: hidden; }
 .site-footer {
   grid-template-columns: auto minmax(170px, 1fr) auto auto;
   gap: clamp(16px, 3vw, 44px);
@@ -1945,8 +1958,11 @@ html[data-theme='light'] #approach .approach-panel h2 em { color: inherit; font:
 #approach .approach-title-word { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; padding-bottom: .08em; margin-bottom: -.08em; }
 #approach .approach-title-char { display: inline-block; transform-origin: 50% 100%; }
 #approach .approach-type-content { display: inline-block; }
-#approach .approach-type-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .12em; margin-bottom: -.12em; }
+#approach .approach-type-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .42em 0; margin-block: -.42em; perspective: 500px; }
 #approach .approach-type-word { display: inline-block; }
+#approach .approach-type-char { display: inline-block; transform-origin: 50% 85%; backface-visibility: hidden; }
+#approach .approach-auto-letter { display: inline-block; animation: approach-auto-letter-drift 1.65s ease-in-out infinite alternate; animation-delay: calc(var(--glyph-index, 0) * -115ms); will-change: transform; }
+@keyframes approach-auto-letter-drift { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
 #approach .panel-copy,
 html[data-theme='light'] #approach .panel-copy { margin-bottom: 34px; color: #c8c3ba; font: 16px/1.65 var(--display); }
 #approach .tool-group + .tool-group { margin-top: 28px; padding-top: 20px; border-top: 1px solid #303030; }
@@ -1960,6 +1976,17 @@ html[data-theme='light'] #approach .tool-group h3 { margin-bottom: 12px; color: 
 #approach .game-list .approach-type-mask,
 #approach .game-list .approach-type-word { padding: 0; border: 0; border-radius: 0; color: inherit; background: transparent; box-shadow: none; font-size: inherit; }
 #approach .game-list .approach-type-mask { overflow: visible; padding: 0; margin: 0; border: 0; border-radius: 0; color: inherit; background: transparent; box-shadow: none; font-size: inherit; }
+#approach .game-list { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#approach .game-list > .game-badge { display: inline-flex; min-height: 44px; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #3a3a3a; color: #d5d0c7; background: #111; font: 600 10px/1 var(--display); letter-spacing: .04em; white-space: nowrap; }
+#approach .game-list > .game-badge:hover { border-color: #777; background: #171717; }
+#approach .game-list .game-logo { display: block; width: 22px; height: 22px; flex: 0 0 22px; }
+#approach .game-list .game-valorant .game-logo { color: #ff4655; }
+#approach .game-list .game-dota .game-logo { color: #e34b3f; }
+#approach .game-list .game-league .game-logo { color: #c8a45c; }
+#approach .game-list .game-apex .game-logo { color: #e45b45; }
+#approach .game-list .game-name,
+#approach .game-list .approach-type-char { display: inline-block; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 0; color: inherit; background: transparent; box-shadow: none; font: inherit; letter-spacing: inherit; }
+#approach .game-list .approach-type-char { letter-spacing: 0; }
 #approach .process-panel .eyebrow { padding-bottom: 16px; border-bottom: 1px solid #303030; }
 #approach .process-list { gap: 0; }
 #approach .process-list li { grid-template-columns: 52px minmax(0, 1fr); gap: 18px; padding: 19px 0; border-bottom: 1px solid #303030; }
@@ -1994,6 +2021,227 @@ html[data-theme='light'] #approach .quote-link { margin-top: auto; padding-top: 
   #approach .approach-quote blockquote,
   html[data-theme='light'] #approach .approach-quote blockquote { font-size: clamp(32px, 9vw, 44px); }
 }
+@media (prefers-reduced-motion: reduce) {
+  #approach .approach-auto-letter { animation: none; will-change: auto; }
+}
+
+/* Consistent, restrained pointer feedback across the portfolio. */
+@media (hover: hover) and (pointer: fine) {
+  :where(a, button, .button, .tech-logo, .adobe-mark, .game-badge,
+    .education-card, .experience-entry, .gallery-card, .gallery-motion-toggle,
+    .project-card, .typing-start) {
+    transition-timing-function: cubic-bezier(.2, .75, .25, 1);
+  }
+
+  :where(a, button, .button, .tech-logo, .adobe-mark, .game-badge,
+    .gallery-motion-toggle, .typing-start):focus-visible {
+    outline: 2px solid #c7a3d8;
+    outline-offset: 4px;
+  }
+
+  .button:hover,
+  .button-dark:hover,
+  .button-light:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.08);
+  }
+
+  .site-header nav a,
+  .contact-navigation a,
+  .site-footer a,
+  .project-links a {
+    transition: color .22s ease, opacity .22s ease, transform .22s ease;
+  }
+
+  .contact-navigation a:hover,
+  .site-footer a:hover,
+  .project-links a:hover { transform: translateX(3px); }
+
+  #approach .game-list > .game-badge,
+  #approach .tech-logo,
+  #approach .adobe-mark {
+    transition: transform .24s ease, border-color .24s ease, background-color .24s ease, box-shadow .24s ease;
+  }
+
+  #approach .game-list > .game-badge:hover,
+  #approach .tech-logo:hover,
+  #approach .adobe-mark:hover {
+    transform: translateY(-4px);
+    border-color: #c7a3d8;
+    box-shadow: 0 8px 22px rgb(0 0 0 / 28%), 0 0 16px rgb(199 163 216 / 12%);
+  }
+
+  .education-card:hover,
+  .experience-entry:hover,
+  .gallery-card:hover { box-shadow: 0 16px 36px rgb(0 0 0 / 18%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(a, button, .button, .tech-logo, .adobe-mark, .game-badge,
+    .education-card, .experience-entry, .gallery-card, .gallery-motion-toggle,
+    .project-card, .typing-start) { scroll-behavior: auto; transition-duration: .01ms !important; }
+}
+
+/* Let hovered panels bend toward the live pointer position. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :where(.project-card, .education-card, .experience-entry, .gallery-card,
+    .tech-logo, .tech-logo > i, .tech-logo > svg, .tech-logo > b, .game-logo,
+    .adobe-mark, .game-badge, .process-list li, .approach-quote,
+    .approach-type-char, .contact-type-char, .scroll-title-char,
+    .directional-type-char, .about-type-char, .arcade-type-char) {
+    transform-style: preserve-3d;
+    transition: transform .12s cubic-bezier(.2, .75, .25, 1);
+  }
+
+  :where(.project-card, .education-card, .experience-entry, .gallery-card,
+    .tech-logo, .tech-logo > i, .tech-logo > svg, .tech-logo > b, .game-logo,
+    .adobe-mark, .game-badge, .process-list li, .approach-quote,
+    .approach-type-char, .contact-type-char, .scroll-title-char,
+    .directional-type-char, .about-type-char, .arcade-type-char).cursor-bending {
+    transform: perspective(850px) rotateX(var(--cursor-bend-y)) rotateY(var(--cursor-bend-x)) scale3d(1.025, 1.025, 1.025) !important;
+    z-index: 5;
+    transform-style: preserve-3d;
+  }
+
+  :where(.tech-logo > i, .tech-logo > svg, .tech-logo > b, .game-logo) { display: inline-block; }
+}
+
+/* Give large animated glyphs enough room so their edges do not get cropped. */
+.education .section-heading h2,
+.experience .section-heading h2,
+.work .section-heading h2,
+#gallery .gallery-heading h2,
+#approach .approach-panel h2,
+.contact-callout h2 {
+  overflow: visible;
+  line-height: 1;
+  padding-block: .07em;
+}
+
+.scroll-title-char,
+.experience-title-char,
+#approach .approach-title-char {
+  padding-block: .07em;
+  margin-block: -.07em;
+}
+
+.experience-title-word,
+#approach .approach-title-word { overflow: visible; }
+
+/* Keep scroll-reveal text masks roomy enough for descenders and animated travel. */
+.about-word-mask,
+.about-type-mask { padding-block: .98em; margin-block: -.98em; }
+.directional-type-mask { padding-block: .68em; margin-block: -.68em; }
+.experience-title-word { padding-block: 1.22em; margin-block: -1.22em; }
+#arcade .arcade-type-mask { padding-block: .98em; margin-block: -.98em; }
+#approach .approach-type-mask { padding-block: .58em; margin-block: -.58em; }
+
+.education-card h3,
+html[data-theme='light'] .education-card h3 { line-height: 1.08; overflow: visible; }
+
+/* Center the full backdrop name and give the halftone map a calmer, polished drift. */
+#top .hero-backdrop-name {
+  top: 34%;
+  right: 0;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  font-size: clamp(62px, 20vw, 360px);
+  line-height: .9;
+  letter-spacing: -.105em;
+  text-align: center;
+  transform: none;
+}
+
+#top .hero-world-map {
+  opacity: .43;
+  filter: drop-shadow(0 0 28px rgb(220 220 220 / 8%));
+  animation: world-map-drift 6.4s cubic-bezier(.45, 0, .55, 1) infinite alternate;
+}
+
+#top .hero-world-map::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: url('/images/halftone-world-map.svg') center 44% / min(112vw, 1650px) auto no-repeat;
+  filter: brightness(1.9) contrast(1.12);
+  mix-blend-mode: screen;
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(circle 190px at var(--map-cursor-x, 50%) var(--map-cursor-y, 45%), #000 0, rgb(0 0 0 / 88%) 42%, transparent 100%);
+  mask-image: radial-gradient(circle 190px at var(--map-cursor-x, 50%) var(--map-cursor-y, 45%), #000 0, rgb(0 0 0 / 88%) 42%, transparent 100%);
+  transition: opacity .22s ease;
+  pointer-events: none;
+}
+
+#top .hero-world-map.cursor-map-active::before {
+  opacity: .95;
+}
+
+#top .hero-world-map::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(112deg, transparent 22%, rgb(255 255 255 / 8%) 47%, transparent 67%);
+  background-size: 220% 100%;
+  opacity: .38;
+  animation: world-map-sheen 5.2s ease-in-out infinite;
+}
+
+@keyframes world-map-drift {
+  from { transform: translate3d(-2.1%, -.8%, 0) scale(1.025); }
+  to { transform: translate3d(2.1%, .8%, 0) scale(1.065); }
+}
+
+@keyframes world-map-sheen {
+  from { background-position: 130% 0; opacity: .08; }
+  50% { opacity: .5; }
+  to { background-position: -30% 0; opacity: .08; }
+}
+
+@media (max-width: 900px) {
+  #top .hero-backdrop-name { top: 30%; font-size: clamp(62px, 20vw, 180px); }
+}
+
+@media (max-width: 620px) {
+  #top .hero-world-map::before { background-size: auto 74%; background-position: center 55%; }
+}
+
+@media (max-width: 480px) {
+  #top .hero-backdrop-name { top: 38%; font-size: clamp(58px, 18vw, 90px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #top .hero-world-map,
+  #top .hero-world-map::after { animation: none; }
+}
+
+/* Keep the header text and menu, but remove the solid bar behind them. */
+.site-header.shell,
+html[data-theme='light'] .site-header.shell {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Extend only the moving world map behind the header so the pattern has no top gap. */
+main { overflow-x: clip; overflow-y: visible; }
+#top.hero.shell { overflow-x: clip; overflow-y: visible; }
+#top .hero-world-map { top: calc(-5% - 76px); }
+
+@media (max-width: 620px) {
+  #top .hero-world-map { top: calc(2% - 66px); }
+}
+
+#top .hero-content > .scroll-note {
+  position: relative;
+  inset: auto;
+  z-index: 7;
+  width: fit-content;
+  margin: 20px 0 0;
+  align-self: flex-start;
+}
 
 /* Enlarge the cutout portrait so it reads clearly in the hero. */
 #top .profile-photo {
@@ -2007,6 +2255,23 @@ html[data-theme='light'] #approach .quote-link { margin-top: auto; padding-top: 
   transform: translateX(-50%);
   transform-origin: center bottom;
 }
+
+/* Show only the transparent portrait cutout; remove the old card treatment. */
+#top .hero-visual { background: transparent; filter: none; }
+#top .hero-content::before { display: none; }
+#top .portrait-card {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+#top .portrait-card::before,
+#top .portrait-card::after { display: none; }
 .pocket-panel { position: relative; transform-origin: 50% 0%; will-change: transform, opacity; }
 @media (prefers-reduced-motion: reduce) { .pocket-panel { will-change: auto; } }
 
@@ -2054,7 +2319,13 @@ html[data-theme='light'] #approach .quote-link { margin-top: auto; padding-top: 
   .hero-backdrop-name { top: 42%; left: 50%; max-width: 100%; font-size: clamp(110px, 24vw, 250px); }
   .hero-marquee { height: clamp(68px, 12vw, 96px); }
   .hero-marquee-group { font-size: clamp(38px, 8vw, 82px); }
-  .scroll-note { bottom: clamp(82px, 11vw, 102px); left: clamp(20px, 5vw, 42px); }
+  .scroll-note {
+    position: relative;
+    inset: auto;
+    align-self: flex-start;
+    margin: 18px clamp(20px, 5vw, 42px) 0;
+    z-index: 8;
+  }
 }
 
 @media (max-width: 480px) {

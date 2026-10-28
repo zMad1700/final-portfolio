@@ -40,6 +40,52 @@ let loaderTimer
 let routeTimer
 let routeTimeline
 let routeCompletion
+const cursorBendSelector = '.project-card, .education-card, .experience-entry, .gallery-card, .tech-logo, .tech-logo > i, .tech-logo > svg, .tech-logo > b, .game-logo, .adobe-mark, .game-badge, .process-list li, .approach-quote, .approach-type-char, .contact-type-char, .scroll-title-char, .directional-type-char, .about-type-char, .arcade-type-char'
+
+function handleCursorBend(event) {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches || reducedMotion()) return
+  updateMapCursorSpot(event)
+  const target = event.target instanceof Element ? event.target.closest(cursorBendSelector) : null
+  if (!target) return
+
+  const bounds = target.getBoundingClientRect()
+  const x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
+  const y = ((event.clientY - bounds.top) / bounds.height) * 2 - 1
+  const strength = target.matches('.tech-logo, .tech-logo > i, .tech-logo > svg, .tech-logo > b, .game-logo, .adobe-mark, .game-badge, .approach-type-char, .contact-type-char, .scroll-title-char, .directional-type-char, .about-type-char, .arcade-type-char') ? 12 : 7
+  target.style.setProperty('--cursor-bend-x', `${(x * strength).toFixed(2)}deg`)
+  target.style.setProperty('--cursor-bend-y', `${(-y * strength).toFixed(2)}deg`)
+  target.classList.add('cursor-bending')
+}
+
+function updateMapCursorSpot(event) {
+  const map = document.querySelector('#top .hero-world-map')
+  if (!map) return
+  const bounds = map.getBoundingClientRect()
+  const inside = event.clientX >= bounds.left && event.clientX <= bounds.right
+    && event.clientY >= bounds.top && event.clientY <= bounds.bottom
+  if (!inside) {
+    map.classList.remove('cursor-map-active')
+    return
+  }
+
+  map.style.setProperty('--map-cursor-x', `${((event.clientX - bounds.left) / bounds.width) * 100}%`)
+  map.style.setProperty('--map-cursor-y', `${((event.clientY - bounds.top) / bounds.height) * 100}%`)
+  map.classList.add('cursor-map-active')
+}
+
+function resetCursorBend(event) {
+  const map = document.querySelector('#top .hero-world-map')
+  const leftHero = !event.relatedTarget || !(event.relatedTarget instanceof Node)
+    || !document.querySelector('#top')?.contains(event.relatedTarget)
+  if (leftHero) map?.classList.remove('cursor-map-active')
+  if (!(event.target instanceof Element)) return
+  const target = event.target.closest(cursorBendSelector)
+  if (target && (!event.relatedTarget || !target.contains(event.relatedTarget))) {
+    target.classList.remove('cursor-bending')
+    target.style.removeProperty('--cursor-bend-x')
+    target.style.removeProperty('--cursor-bend-y')
+  }
+}
 
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -127,10 +173,14 @@ function onRouteTransitionCancelled() {
 
 onMounted(() => {
   if (routeCurtain.value) gsap.set(routeCurtain.value, { yPercent: -105, autoAlpha: 0 })
+  document.addEventListener('pointermove', handleCursorBend, { passive: true })
+  document.addEventListener('pointerout', resetCursorBend, { passive: true })
   loaderTimer = window.setTimeout(() => { isLoading.value = false }, 4550)
 })
 
 onBeforeUnmount(() => {
+  document.removeEventListener('pointermove', handleCursorBend)
+  document.removeEventListener('pointerout', resetCursorBend)
   cancelRouteTransition(true)
   window.clearTimeout(loaderTimer)
 })

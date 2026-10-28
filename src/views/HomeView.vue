@@ -106,6 +106,7 @@ function splitApproachText() {
     '#approach .quote-link-text',
   ].join(', ')
 
+  let processGlyphIndex = 0
   portfolioRoot.value?.querySelectorAll(selectors).forEach((element) => {
     element.classList.add('approach-type-line')
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
@@ -125,7 +126,20 @@ function splitApproachText() {
         const word = document.createElement('span')
         mask.className = 'approach-type-mask'
         word.className = 'approach-type-word'
-        word.textContent = part
+        Array.from(part).forEach((character) => {
+          const letter = document.createElement('span')
+          letter.className = 'approach-type-char'
+          if (element.closest('.process-list')) {
+            const glyph = document.createElement('span')
+            glyph.className = 'approach-auto-letter'
+            glyph.style.setProperty('--glyph-index', String(processGlyphIndex++ % 8))
+            glyph.textContent = character
+            letter.append(glyph)
+          } else {
+            letter.textContent = character
+          }
+          word.append(letter)
+        })
         mask.append(word)
         fragment.append(mask)
       })
@@ -223,7 +237,12 @@ function splitContactText() {
         const word = document.createElement('span')
         mask.className = 'contact-type-mask'
         word.className = 'contact-type-word'
-        word.textContent = part
+        Array.from(part).forEach((character) => {
+          const letter = document.createElement('span')
+          letter.className = 'contact-type-char'
+          letter.textContent = character
+          word.append(letter)
+        })
         mask.append(word)
         fragment.append(mask)
       })
@@ -323,6 +342,36 @@ function splitCardTypography() {
   })
 }
 
+function splitEditorialTitles() {
+  const selectors = [
+    '#education .section-heading h2',
+    '#work .section-heading h2',
+    '#gallery .gallery-heading h2',
+  ].join(', ')
+
+  portfolioRoot.value?.querySelectorAll(selectors).forEach((title) => {
+    title.classList.add('scroll-type-title')
+    const walker = document.createTreeWalker(title, NodeFilter.SHOW_TEXT)
+    const textNodes = []
+    while (walker.nextNode()) textNodes.push(walker.currentNode)
+
+    textNodes.forEach((textNode) => {
+      const fragment = document.createDocumentFragment()
+      Array.from(textNode.textContent).forEach((character) => {
+        if (/\s/.test(character)) {
+          fragment.append(document.createTextNode(character))
+          return
+        }
+        const letter = document.createElement('span')
+        letter.className = 'scroll-title-char'
+        letter.textContent = character
+        fragment.append(letter)
+      })
+      textNode.replaceWith(fragment)
+    })
+  })
+}
+
 onMounted(() => {
   lastScrollY = window.scrollY
   window.addEventListener('scroll', scheduleHeaderUpdate, { passive: true })
@@ -337,6 +386,7 @@ onMounted(() => {
   splitContactText()
   splitAboutText()
   splitCardTypography()
+  splitEditorialTitles()
 
   context = gsap.context(() => {
     const intro = gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -387,6 +437,26 @@ onMounted(() => {
       },
     )
 
+    gsap.utils.toArray('.scroll-type-title').forEach((title) => {
+      gsap.fromTo(title.querySelectorAll('.scroll-title-char'),
+        { yPercent: 82, rotationX: -42, opacity: 0.14 },
+        {
+          yPercent: 0,
+          rotationX: 0,
+          opacity: 1,
+          stagger: 0.014,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: title,
+            start: 'top 92%',
+            end: 'top 48%',
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+
     gsap.fromTo('.approach-title-char',
       { yPercent: 110, rotationX: -55, opacity: 0.12 },
       {
@@ -407,19 +477,26 @@ onMounted(() => {
     )
 
     gsap.utils.toArray('.approach-type-line').forEach((line) => {
-      gsap.fromTo(line.querySelectorAll('.approach-type-word'),
-        { yPercent: 18, opacity: 0.68 },
+      gsap.fromTo(line.querySelectorAll('.approach-type-char'),
+        (index) => ({
+          x: index % 2 === 0 ? -7 : 7,
+          yPercent: index % 2 === 0 ? 44 : -34,
+          rotationX: index % 2 === 0 ? -24 : 24,
+          opacity: 0.38,
+        }),
         {
+          x: 0,
           yPercent: 0,
+          rotationX: 0,
           opacity: 1,
           duration: 1,
-          stagger: 0.06,
+          stagger: 0.012,
           ease: 'none',
           scrollTrigger: {
             trigger: line,
-            start: 'top 105%',
-            end: 'top 78%',
-            scrub: 0.35,
+            start: 'top 96%',
+            end: 'top 58%',
+            scrub: 0.65,
             invalidateOnRefresh: true,
           },
         },
@@ -447,19 +524,26 @@ onMounted(() => {
     })
 
     gsap.utils.toArray('.contact-type-line').forEach((line) => {
-      gsap.fromTo(line.querySelectorAll('.contact-type-word'),
-        { yPercent: 55, opacity: 0.5 },
+      gsap.fromTo(line.querySelectorAll('.contact-type-char'),
+        (index) => ({
+          x: [-12, 12, -7, 7][index % 4],
+          yPercent: [30, -24, -30, 24][index % 4],
+          rotationX: [18, -18, 13, -13][index % 4],
+          opacity: 0.62,
+        }),
         {
+          x: 0,
           yPercent: 0,
+          rotationX: 0,
           opacity: 1,
           duration: 1,
-          stagger: 0.05,
+          stagger: 0.012,
           ease: 'none',
           scrollTrigger: {
             trigger: line,
             start: 'top 105%',
             end: 'top 70%',
-            scrub: 1.1,
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         },
@@ -507,7 +591,8 @@ onMounted(() => {
     const animateDirectionalCards = (selector) => {
       gsap.utils.toArray(selector).forEach((card, index) => {
         const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
-        const distance = isTouchDevice ? 48 : 112
+        // Keep the reveal inside the viewport so card edges and text never slide off-screen.
+        const distance = isTouchDevice ? 0 : Math.min(34, window.innerWidth * 0.02)
         const direction = index === 0
           ? { x: -distance, y: 34 }
           : index === 1
@@ -639,22 +724,87 @@ onMounted(() => {
       })
     })
 
-    gsap.fromTo('.tech-logo, .adobe-mark',
-      { y: 12, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.45,
-        stagger: 0.045,
-        ease: 'power2.out',
-        clearProps: 'transform,opacity',
-        scrollTrigger: {
-          trigger: '.skill-panel',
-          start: 'top 78%',
-          once: true,
+    const approachDirections = [
+      { x: -38, y: 0 },
+      { x: 38, y: 0 },
+      { x: 0, y: -34 },
+      { x: 0, y: 34 },
+    ]
+    const directionalPanels = [
+      { selector: '#approach .skill-panel', x: -52, y: 0 },
+      { selector: '#approach .process-panel', x: 0, y: 48 },
+      { selector: '#approach .approach-quote', x: 52, y: 0 },
+    ]
+
+    directionalPanels.forEach(({ selector, x, y }) => {
+      const panel = document.querySelector(selector)
+      if (!panel) return
+      gsap.fromTo(panel,
+        { x, y, opacity: 0.28 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: panel,
+            start: 'top 94%',
+            end: 'top 62%',
+            scrub: 0.75,
+            invalidateOnRefresh: true,
+          },
         },
-      },
-    )
+      )
+    })
+
+    const quoteDirections = [
+      { selector: '#approach .quote-mark', x: -34, y: 0 },
+      { selector: '#approach .approach-quote blockquote', x: 38, y: 0 },
+      { selector: '#approach .quote-signoff', x: 0, y: -28 },
+      { selector: '#approach .quote-link', x: 0, y: 28 },
+    ]
+    quoteDirections.forEach(({ selector, x, y }) => {
+      const element = document.querySelector(selector)
+      if (!element) return
+      gsap.fromTo(element,
+        { x, y, opacity: 0.3, scale: 0.97 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 94%',
+            end: 'top 62%',
+            scrub: 0.7,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+
+    gsap.utils.toArray('#approach .tech-logo, #approach .adobe-mark').forEach((item, index) => {
+      const direction = approachDirections[index % approachDirections.length]
+      gsap.fromTo(item,
+        { ...direction, opacity: 0.18, scale: 0.88 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 94%',
+            end: 'top 72%',
+            scrub: 0.65,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
 
     const pocketPanels = gsap.utils.toArray('#top.hero, #about, #education, #experience, #work, #gallery, #arcade, #approach, #contact')
     pocketPanels.forEach((panel, index) => {
@@ -778,6 +928,7 @@ onUnmounted(() => {
           <div><strong>PH</strong><span>BASED IN DAVAO</span></div>
           <div><strong>VUE</strong><span>CURRENTLY LEARNING</span></div>
         </div>
+        <a class="scroll-note" href="#about"><span class="scroll-line"></span> SCROLL TO EXPLORE</a>
       </div>
       <div class="hero-visual">
         <div class="portrait-card" aria-label="Editorial portrait of Kenneth Lance Jorolan">
@@ -790,7 +941,6 @@ onUnmounted(() => {
           <div class="hero-marquee-group"><span>You can call me Mad</span><i></i><span>Aspiring Web Developer</span><i></i><span>Digos City · Philippines</span><i></i></div>
         </div>
       </div>
-      <a class="scroll-note" href="#about"><span class="scroll-line"></span> SCROLL TO EXPLORE</a>
     </section>
 
     <section id="about" class="about section-pad">
@@ -903,7 +1053,7 @@ onUnmounted(() => {
 
     <section id="approach" class="approach section-pad">
       <div class="shell approach-grid">
-        <article class="approach-panel skill-panel" data-reveal>
+        <article class="approach-panel skill-panel">
           <p class="eyebrow"><span class="eyebrow-line"></span> SKILLS & INTERESTS</p>
           <h2 aria-label="Creative by nature.">
             <template v-for="(word, wordIndex) in approachTitleWords" :key="word">
@@ -942,10 +1092,15 @@ onUnmounted(() => {
           </div>
           <div class="tool-group gaming-group">
             <h3>GAMING</h3>
-            <div class="skill-list game-list"><span>VALORANT</span><span>DOTA 2</span><span>LEAGUE OF LEGENDS</span><span>APEX LEGENDS</span></div>
+            <div class="skill-list game-list" aria-label="Games I play">
+              <span class="game-badge game-valorant" role="img" aria-label="Valorant"><svg class="game-logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 5h7l5 12 5-12h7L16 28 4 5Z" fill="currentColor"/><path d="M20 18h8l-4 7h-8l4-7Z" fill="#080808"/></svg><span class="game-name">VALORANT</span></span>
+              <span class="game-badge game-dota" role="img" aria-label="Dota 2"><svg class="game-logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2.8A13.2 13.2 0 1 0 16 29.2 13.2 13.2 0 0 0 16 2.8Zm5.6 5.1-2.1 5.3 4.1 3.5-5.4 1.4-1.6 5.3-3.1-4.6-5.6.1 3.4-4.4-1.8-5.3 5.2 2 4.7-3.3-.2 5.6 4.4 3.4-5.6.2 3.6-3.9Z" fill="currentColor"/></svg><span class="game-name">DOTA 2</span></span>
+              <span class="game-badge game-league" role="img" aria-label="League of Legends"><svg class="game-logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4h5v18h13v5H7V4Zm11 0h8v5h-8V4Zm0 8h7v5h-7v-5Z" fill="currentColor"/><path d="M4 3h2v26H4z" fill="currentColor"/></svg><span class="game-name">LEAGUE OF LEGENDS</span></span>
+              <span class="game-badge game-apex" role="img" aria-label="Apex Legends"><svg class="game-logo" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 29 27h-7l-6-11-6 11H3L16 3Z" fill="currentColor"/><path d="M12.3 23h7.4l-3.7-6.7-3.7 6.7Z" fill="#080808"/><path d="M10 29h12" stroke="currentColor" stroke-width="2"/></svg><span class="game-name">APEX LEGENDS</span></span>
+            </div>
           </div>
         </article>
-        <article class="approach-panel process-panel" data-reveal>
+        <article class="approach-panel process-panel">
           <p class="eyebrow"><span class="eyebrow-line"></span> HOW I APPROACH A BUILD</p>
           <ol class="process-list">
             <li><span>01</span><div><strong>Understand</strong><p>Get clear on the goal and who it is for.</p></div></li>
@@ -954,7 +1109,7 @@ onUnmounted(() => {
             <li><span>04</span><div><strong>Refine</strong><p>Review details, improve, and keep learning.</p></div></li>
           </ol>
         </article>
-        <aside class="approach-quote" data-reveal>
+        <aside class="approach-quote">
           <span class="quote-mark">“</span>
           <blockquote>Being a misfit means I’m not afraid to look at an idea from a different angle.</blockquote>
           <span class="quote-signoff">KENNETH “MAD” JOROLAN</span>
