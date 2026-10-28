@@ -211,10 +211,6 @@ function splitContactText() {
     '#contact .contact-navigation a',
     '#contact .contact-callout h2',
     '#contact .contact-callout .button-label',
-    '.site-footer .brand',
-    '.site-footer > span',
-    '.site-footer .footer-social a',
-    '.site-footer .back-top',
   ].join(', ')
 
   portfolioRoot.value?.querySelectorAll(selectors).forEach((element) => {
@@ -357,15 +353,24 @@ function splitEditorialTitles() {
 
     textNodes.forEach((textNode) => {
       const fragment = document.createDocumentFragment()
-      Array.from(textNode.textContent).forEach((character) => {
-        if (/\s/.test(character)) {
-          fragment.append(document.createTextNode(character))
+      textNode.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return
+        if (/^\s+$/.test(part)) {
+          fragment.append(document.createTextNode(part))
           return
         }
-        const letter = document.createElement('span')
-        letter.className = 'scroll-title-char'
-        letter.textContent = character
-        fragment.append(letter)
+
+        // Keep each word together so character spans cannot wrap a leading
+        // glyph onto its own line on narrower screens.
+        const word = document.createElement('span')
+        word.className = 'scroll-title-word'
+        Array.from(part).forEach((character) => {
+          const letter = document.createElement('span')
+          letter.className = 'scroll-title-char'
+          letter.textContent = character
+          word.append(letter)
+        })
+        fragment.append(word)
       })
       textNode.replaceWith(fragment)
     })
@@ -544,6 +549,55 @@ onMounted(() => {
             start: 'top 105%',
             end: 'top 70%',
             scrub: 0.8,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+
+    // Give the contact section a clear directional entrance tied to scrolling.
+    const contactDirections = [
+      { selector: '#contact .contact-info', x: -54, y: 0 },
+      { selector: '#contact .contact-callout', x: 54, y: 18 },
+    ]
+    contactDirections.forEach(({ selector, x, y }) => {
+      const element = document.querySelector(selector)
+      if (!element) return
+      gsap.fromTo(element,
+        { x, y, opacity: 0.22 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          duration: 0.82,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+          scrollTrigger: {
+            trigger: '#contact',
+            start: 'top 82%',
+            once: true,
+            invalidateOnRefresh: true,
+          },
+        },
+      )
+    })
+
+    gsap.utils.toArray('#contact .contact-navigation a').forEach((link, index) => {
+      const fromLeft = index % 2 === 0
+      gsap.fromTo(link,
+        { x: fromLeft ? -34 : 34, y: index % 4 < 2 ? 16 : -16, opacity: 0.2 },
+        {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          duration: 0.72,
+          delay: index * 0.055,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+          scrollTrigger: {
+            trigger: link,
+            start: 'top 88%',
+            once: true,
             invalidateOnRefresh: true,
           },
         },

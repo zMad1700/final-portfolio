@@ -1303,7 +1303,26 @@ html[data-theme='light'] .hero-backdrop-name { color: #111; }
   .site-header.shell { min-height: 66px; padding: 12px 18px; }
   .header-brand { max-width: calc(100vw - 140px); font-size: 14px; }
   .menu-toggle { gap: 10px; font-size: 14px; }
-  .site-header .header-nav-panel nav { top: calc(100% + 10px); }
+  .site-header .header-nav-panel nav {
+    position: fixed;
+    top: 76px;
+    right: 12px;
+    left: auto;
+    width: min(340px, calc(100vw - 24px));
+    max-height: calc(100vh - 88px);
+    max-height: calc(100dvh - 88px);
+    padding: 8px 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .site-header .header-nav-panel nav a {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
   .hero.shell { display: flex; min-height: 0; flex-direction: column; gap: 0; padding: 34px 22px 116px; }
   .hero-content { position: relative; top: auto; left: auto; width: 100%; max-width: 440px; margin: 0 auto; transform: none; }
   .hero-kicker { margin-bottom: 15px; }
@@ -2125,6 +2144,9 @@ html[data-theme='light'] #approach .quote-link { margin-top: auto; padding-top: 
   margin-block: -.07em;
 }
 
+/* Keep animated headline glyphs grouped by word to prevent orphan letters. */
+.scroll-title-word { display: inline-block; white-space: nowrap; }
+
 .experience-title-word,
 #approach .approach-title-word { overflow: visible; }
 
@@ -2332,6 +2354,7 @@ main { overflow-x: clip; overflow-y: visible; }
   .site-header.shell { gap: 10px; padding-inline: 16px; }
   .header-brand { max-width: calc(100vw - 120px); font-size: clamp(13px, 4vw, 16px); }
   .menu-toggle { gap: 8px; font-size: 13px; }
+  .site-header .header-nav-panel nav { top: 70px; right: 10px; width: min(340px, calc(100vw - 20px)); max-height: calc(100dvh - 80px); }
   .hero.shell { gap: 25px; padding: 30px 18px 112px; }
   .hero h1 { font-size: clamp(38px, 11.5vw, 52px); }
   .hero-copy { font-size: 12px; }
